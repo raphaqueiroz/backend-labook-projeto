@@ -1,84 +1,62 @@
-import { Request, Response } from "express"
-import { UserBusiness } from "../business/userBusiness"
-import { GetUsersInput, LoginInput, SignupInput } from "../dtos/UserDTO"
+import { ZodError } from "zod";
+import { UserBusiness } from "../business/userBusiness";
+import { BaseError } from "../errors/BaseError";
+import { Request, Response } from "express";
+import { SignupSchema } from "../dtos/user/signup.dto";
+import { LoginSchema } from "../dtos/user/login.dto";
 
 export class UserController {
     constructor(
         private userBusiness: UserBusiness
-    ) {}
+    ){}
 
-    public getUsers = async (req: Request, res: Response) => {
-        try {
-            const input: GetUsersInput = {
-                q: req.query.q as string
-            }
+    public signup = async (req: Request, res: Response) =>{
+        try{
 
-            const output = await this.userBusiness.getUsers(input)
-    
-            res.status(200).send(output)
-        } catch (error) {
-            console.log(error)
-    
-            if (req.statusCode === 200) {
-                res.status(500)
-            }
-    
-            if (error instanceof Error) {
-                res.send(error.message)
-            } else {
-                res.send("Erro inesperado")
-            }
-        }
-    }
-
-    public signup = async (req: Request, res: Response) => {
-        try {
-            const input: SignupInput = {
+            const input = SignupSchema.parse({
                 name: req.body.name,
                 email: req.body.email,
                 password: req.body.password
-            }
-            
-            const output = await this.userBusiness.signup(input)
-    
-            res.status(201).send(output)
+            })
+
+            const response = await this.userBusiness.signup(input)
+
+            res.status(201).send(response)
+
         } catch (error) {
-            console.log(error)
-    
-            if (req.statusCode === 200) {
-                res.status(500)
-            }
-    
-            if (error instanceof Error) {
-                res.send(error.message)
-            } else {
-                res.send("Erro inesperado")
-            }
+        console.log(error)
+        if(error instanceof ZodError) { // erro de dados de entrada.
+            res.status(400).send(error.issues)
+            
+        } else if (error instanceof BaseError) {
+            res.status(error.statusCode).send(error.message)
+        } else { 
+            res.status(500).send("Erro inesperado")
+        }
         }
     }
 
-    public login = async (req: Request, res: Response) => {
-        try {
-            const input: LoginInput = {
+    public login = async (req: Request, res: Response) =>{
+        try{
+
+            const input = LoginSchema.parse({
                 email: req.body.email,
                 password: req.body.password
-            }
+            })
 
-            const output = await this.userBusiness.login(input)
-    
-            res.status(200).send(output)
+            const response = await this.userBusiness.login(input) //enviado para  business;
+            res.status(200).send(response)
+
         } catch (error) {
-            console.log(error)
-    
-            if (req.statusCode === 200) {
-                res.status(500)
-            }
-    
-            if (error instanceof Error) {
-                res.send(error.message)
-            } else {
-                res.send("Erro inesperado")
-            }
+        console.log(error)
+        if(error instanceof ZodError) { // erro de dados de entrada.
+            res.status(400).send(error.issues)
+            
+        } else if (error instanceof BaseError) {
+            res.status(error.statusCode).send(error.message)
+        } else { 
+            res.status(500).send("Erro inesperado")
+        }
         }
     }
 }

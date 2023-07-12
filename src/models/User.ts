@@ -75,4 +75,15 @@ export class User {
     public setCreatedAt(value: string): void {
         this.created_at = value
     }
+
+    public toDBModel(): UserDB {
+        return {
+            id: this.id,
+            name: this.name,
+            email: this.email,
+            password: this.password,
+            role: this.role,
+            created_at: this.created_at
+        }
+    }
 }
