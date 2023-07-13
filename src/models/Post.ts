@@ -1,4 +1,4 @@
-export interface PostsDB { //modelo a ser usado no banco de dados
+export interface PostDB { //modelo a ser usado no banco de dados
     id: string,
     creator_id: string,
     content: string,
@@ -112,5 +112,33 @@ export class Post {
 
     public setCreatorName (value: string): void {
         this.creatorName = value
+    }
+
+    public toDBModel(): PostDB  {
+        return {
+            id: this.id,
+            creator_id: this.creatorId,
+            content: this.content,
+            likes: this.likes,
+            dislikes: this.dislikes,
+            created_at: this.createdAt,
+            updated_at: this.updatedAt
+
+        }
+    }
+
+    public toBusinessModel(): PostModel {
+        return{
+            id: this.id,
+    content: this.content,
+    likes: this.likes,
+    dislikes: this.dislikes,
+    createdAt: this.createdAt,
+    updatedAt: this.updatedAt,
+    creator: {
+        id: this.creatorId,
+        name: this.creatorName
+    }
+        }
     }
 }
