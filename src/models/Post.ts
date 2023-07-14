@@ -22,6 +22,12 @@ export interface PostModel { //modelo a ser usado no front
     }
 }
 
+export interface LikeDislikeDB {
+    user_id: string,
+    post_id: string,
+    like: number
+}
+
 export class Post {
     constructor(
         private id: string,

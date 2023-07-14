@@ -1,6 +1,6 @@
 
 import { response } from "express";
-import { PostDB } from "../models/Post";
+import { LikeDislikeDB, PostDB } from "../models/Post";
 import { BaseDatabase } from "./BaseDatabase";
 
 export class PostDatabase extends BaseDatabase {
@@ -29,7 +29,66 @@ export class PostDatabase extends BaseDatabase {
     public updatePost = async (postDB: PostDB): Promise<void> => {
         await BaseDatabase
         .connection(PostDatabase.TABLE_POSTS)
-        .update({ content: postDB.content})
+        .update({ 
+            content: postDB.content,
+            updated_at: postDB.updated_at,
+            likes: postDB.likes,
+            dislikes: postDB.dislikes
+        })
         .where({id: postDB.id})
+    }
+
+    public deletePost = async (postDB: PostDB): Promise<void> => {
+        await BaseDatabase
+        .connection(PostDatabase.TABLE_POSTS)
+        .delete()
+        .where({id: postDB.id})
+    }
+
+    public findLikeDislike = 
+        async (postId: string, userId: string): Promise<LikeDislikeDB | undefined> => {
+            const [likeDislikeDB]: LikeDislikeDB[] = await BaseDatabase
+            .connection(PostDatabase.TABLE_LIKES_DISLIKES)
+            .select()
+            .where({
+                post_id: postId,
+                user_id: userId
+            })
+
+            return likeDislikeDB
+    }
+
+    public insertLikeDislike = 
+    async (postId: string, userId: string, like: number): Promise<void> => {
+        await BaseDatabase
+        .connection(PostDatabase.TABLE_LIKES_DISLIKES)
+        .insert({
+            post_id: postId,
+            user_id: userId,
+            like: like
+        })
+    }
+
+    public updateLikeDislike = 
+    async (postId: string, userId: string, like: number): Promise<void> => {
+        await BaseDatabase
+        .connection(PostDatabase.TABLE_LIKES_DISLIKES)
+        .update({
+            like: like
+        })
+        .where({
+            post_id: postId,
+            user_id: userId
+        })
+    }
+
+    public deleteLikeDislike = async (postId: string, userId: string): Promise<void> => {
+        await BaseDatabase
+        .connection(PostDatabase.TABLE_LIKES_DISLIKES)
+        .delete()
+        .where({
+            post_id: postId,
+            user_id: userId
+        })
     }
 }
